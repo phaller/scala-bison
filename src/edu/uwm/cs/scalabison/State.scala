@@ -119,7 +119,7 @@ class State(val number : Int, val core : Set[Item]) {
     }
     // 2. then the successor relation
     val succ : PartialFunction[Int,scala.collection.Set[Int]] = {
-        i:Int => i match {
+        (i: Int) => i match {
         case 1 => {
           var s : ListSet[Int] = ListSet.empty;
         for (item <- core) {

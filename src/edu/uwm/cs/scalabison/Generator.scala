@@ -102,7 +102,7 @@ class Generator(prefix : String, table : BisonTable)
     pw.println("    while (!test(yycur)) {");
     if (Options.debug)
       pw.println("      if (yydebug) println(\"Discarding current token\");");
-    pw.println("      yynext;");
+    pw.println("      yynext();");
     pw.println("      if (yycur == "+prefix+"Tokens.YYEOF()) throw new YYError(\"Giving up\")");
     pw.println("    }");
     pw.println("  }");
@@ -110,7 +110,7 @@ class Generator(prefix : String, table : BisonTable)
     pw.println("  def yyreset(input : Iterator["+prefix+"Tokens.YYToken]) = {");
     pw.println("    yyinput = input;");
     pw.println("    yynt = null;"); // No YYGoto
-    pw.println("    yynext");
+    pw.println("    yynext()");
     pw.println("  }");
     pw.println("");
     pw.println("  def yyparse() : Boolean = {");
@@ -141,7 +141,7 @@ class Generator(prefix : String, table : BisonTable)
      */
     pw.println("  def parse_YYCHAR(yy:Char) : Unit = {");
     pw.println("    yycur match {");
-    pw.println("      case " + prefix +"Tokens.YYCHAR(`yy`) => yynext; ()");
+    pw.println("      case " + prefix +"Tokens.YYCHAR(`yy`) => yynext(); ()");
     pw.println("      case _ => throw new YYError(\"Expected '\"+yy+\"'\");");
     pw.println("    }");
     pw.println("  }");
@@ -156,9 +156,9 @@ class Generator(prefix : String, table : BisonTable)
         pw.println("    yycur match {");
         pw.print("      case " + prefix + "Tokens." + t.name);
         if (t.typed) {
-          pw.println("(yy) => yynext; yy");
+          pw.println("(yy) => yynext(); yy");
         } else {
-          pw.println("() => yynext; ()");
+          pw.println("() => yynext(); ()");
         }
         pw.println("      case _ => throw new YYError(\"Expected '" + t.name + "'\");");
         pw.println("    }");
@@ -170,7 +170,7 @@ class Generator(prefix : String, table : BisonTable)
 
     for ((nt,state) <- lctable.NTstate) {
       pw.print("  def parse_" + code(nt) + "()")
-      pw.print(" : " + nt.getType)
+      pw.print(" : " + nt.getType())
       pw.println(" = {");
       if (Options.debug)
         pw.println("    if (yydebug) println(\"Parsing "+nt.name+"\");");
@@ -441,7 +441,7 @@ class Generator(prefix : String, table : BisonTable)
           appendAcceptNT(sb,nt);
         }
         case ShiftAction(s) => {
-          sb append "yynext; ";
+          sb append "yynext(); ";
           writeState(pw,s.asInstanceOf[LeftCornerState]);
           appendGoto(sb,longest,s);
         }
@@ -605,7 +605,7 @@ class Generator(prefix : String, table : BisonTable)
 			     longest : Item, 
 			     rule : Rule) = {
     // YYGOTO: This routine must be rewritten to use yynest.
-    val rp = rule.getRecognitionPoint;
+    val rp = rule.getRecognitionPoint();
     var li : Int = 0;
     if (longest != null) li = longest.index;
     if (rule.lhs.typed) {

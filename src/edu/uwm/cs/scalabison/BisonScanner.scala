@@ -62,23 +62,27 @@ class BisonScanner(input : Iterator[Char])
   private def readComment() : String = {
     val sb : StringBuilder = new StringBuilder("/");
     if (headInput == '/') {
-      do {
+      while {
 	sb += headInput
 	nextInput
-      } while (headInput != '\n');
+        headInput != '\n'
+      } do ();
     } else if (headInput == '*') {
-      do {
-	   do {
+      while {
+	   while {
 	     sb += headInput;
 	     //print("+" + headInput);
 	     nextInput;
-	   } while (headInput != '*');
-	   do {
+             headInput != '*'
+	   } do ();
+	   while {
 	     sb += headInput;
 	     //print("-" + headInput);
 	     nextInput;
-	   } while (headInput == '*');
-      } while (headInput != '/');
+             headInput == '*'
+	   } do ();
+           headInput != '/'
+      } do ();
       sb += headInput;
       nextInput
     } else {
@@ -98,10 +102,11 @@ class BisonScanner(input : Iterator[Char])
 
   def readID() : String = {
     val sb : StringBuilder = new StringBuilder();
-    do {
+    while {
       sb += headInput;
       nextInput
-    } while (isKeyChar(headInput));
+      isKeyChar(headInput)
+    } do ();
     sb.toString
   }
 
@@ -186,7 +191,7 @@ class BisonScanner(input : Iterator[Char])
       if (headInput == '/') {
 	nextInput
 	if (headInput == '/' || headInput == '*') {
-	  readComment
+	  readComment()
 	  hasNext
 	} else {
 	  pushInput('/');
@@ -206,7 +211,7 @@ class BisonScanner(input : Iterator[Char])
 	      BisonTokens.BEGIN()
 	    }
 	    case ID() => {
-	      readID match {
+	      readID() match {
 		case "left" => BisonTokens.LEFT()
 		case "right" => BisonTokens.RIGHT()
 		case "nonassoc" => BisonTokens.NONASSOC()
@@ -288,11 +293,12 @@ class BisonScanner(input : Iterator[Char])
 	    BisonTokens.VAR(-1)
 	  } else if (headInput >= '0' && headInput <= '9') {
 	    var result : Int = 0
-	    do {
+	    while {
 	      result *= 10;
 	      result += (headInput - '0');
 	      nextInput
-	    } while (headInput >= '0' && headInput <= '9');
+              headInput >= '0' && headInput <= '9'
+	    } do ();
 	    BisonTokens.VAR(result)
 	  } else {
 	    throw new GrammarSpecificationError("$ must be followed by int");
@@ -312,15 +318,16 @@ class BisonScanner(input : Iterator[Char])
 	case '"' => BisonTokens.CODE(readQuoted('"'))
 	case ch:Char => {
 	  var sb : StringBuilder = new StringBuilder
-	  do {
+	  while {
 	    sb += headInput
 	    nextInput
-	  } while (headInput != '$' && 
+            (headInput != '$' &&
 		   headInput != '}' &&
 		   headInput != '{' &&
 		   headInput != '%' &&
 		   headInput != '/' && 
 		   headInput != '\'' && headInput != '"')
+	  } do ();
 	  return BisonTokens.CODE(sb.toString)
 	}
       }
