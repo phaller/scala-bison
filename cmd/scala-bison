@@ -10,5 +10,5 @@ fi
 # bison MUST be version 1.875 or later
 bison -v $1.y
 rm $1.tab.c
-scala -cp $JAR -howtorun:object edu.uwm.cs.scalabison.RunGenerator -v $1.y
+scala -cp $JAR edu.uwm.cs.scalabison.RunGenerator $1.y
 rm $1.output
